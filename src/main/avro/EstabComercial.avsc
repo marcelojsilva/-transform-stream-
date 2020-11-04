@@ -1,0 +1,11 @@
+{
+  "type": "record",
+  "name": "EstabComercial",
+  "namespace": "com.veloe.si.avro",
+  "fields": [
+    {"name": "id", "type": "long"},
+    {"name": "CodEc", "type": "long"},
+    {"name": "tipoEC", "type": "string"},
+    {"name": "liberadoOperacao", "type": "int"}
+  ]
+}

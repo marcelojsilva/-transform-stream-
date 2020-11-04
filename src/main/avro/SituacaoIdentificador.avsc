@@ -1,0 +1,15 @@
+{
+  "type": "record",
+  "name": "SituacaoIdentificador",
+  "namespace": "com.veloe.si.avro",
+  "fields": [
+    {"name": "id", "type": "long"},
+    {"name": "CodEc", "type": "long"},
+    {"name": "idIdent", "type": "long"},
+    {"name": "tipoIdent", "type": "string"},
+    {"name": "dataAlteracao", "type": "string"},
+    {"name": "placa", "type": "string"},
+    {"name": "ativo", "type": "int"},
+    {"name": "bloqueado", "type": "int"}
+  ]
+}
