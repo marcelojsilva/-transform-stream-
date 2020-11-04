@@ -50,7 +50,7 @@ docker exec -it schema-registry /usr/bin/kafka-avro-console-consumer --topic Sit
 ```
 
 ### Result
-Output two lines for each EC
+Output two lines transformed for each EC
 ```
 {"id":1,"CodEc":121,"idIdent":0,"tipoIdent":"tag","dataAlteracao":"2020-10-10 10:10:00","placa":"AAA1234","ativo":1,"bloqueado":0}
 {"id":1,"CodEc":121,"idIdent":1,"tipoIdent":"tag","dataAlteracao":"2020-10-10 10:10:01","placa":"AAA1234","ativo":1,"bloqueado":0}
