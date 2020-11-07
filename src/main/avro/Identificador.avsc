@@ -4,12 +4,13 @@
   "namespace": "com.veloe.si.avro",
   "doc": "Object used for the recipe: Last Window Result",
   "fields": [
-    {"name": "id", "type": "string"},
+    {"name": "id", "type": "long"},
     {"name": "tipoIdent", "type": "string"},
     {"name": "dataAlteracao", "type": "string"},
     {"name": "placa", "type": "string"},
     {"name": "ativo", "type": "boolean"},
     {"name": "bloqueioTemp", "type": "boolean"},
-    {"name": "bloqueioSaldo", "type": "boolean"}
+    {"name": "bloqueioSaldo", "type": "boolean"},
+    {"name": "codGrupoEc", "type": "long"}
   ]
 }

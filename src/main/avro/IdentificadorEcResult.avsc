@@ -1,0 +1,13 @@
+{
+  "type": "record",
+  "name": "IdentificadorEcResult",
+  "namespace": "com.veloe.si.avro",
+  "fields": [
+    {"name": "id", "type": "long"},
+    {"name": "Identificador", "type": "com.veloe.si.avro.Identificador"},
+    {"name": "Ecs", "type": {
+        "type": "array",
+        "items": "com.veloe.si.avro.EstabComercial"
+    }}
+  ]
+}

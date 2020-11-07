@@ -1,0 +1,12 @@
+{
+  "type": "record",
+  "name": "GrupoEcAggr",
+  "namespace": "com.veloe.si.avro",
+  "fields": [
+    {"name": "codGrupoEc", "type": "long"},
+    {"name": "Ecs", "type": {
+        "type": "array",
+        "items": "com.veloe.si.avro.EstabComercial"
+    }}
+  ]
+}

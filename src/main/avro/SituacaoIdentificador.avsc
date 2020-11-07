@@ -9,7 +9,7 @@
     {"name": "tipoIdent", "type": "string"},
     {"name": "dataAlteracao", "type": "string"},
     {"name": "placa", "type": "string"},
-    {"name": "ativo", "type": "int"},
-    {"name": "bloqueado", "type": "int"}
+    {"name": "ativo", "type": "boolean"},
+    {"name": "bloqueado", "type": "boolean"}
   ]
 }

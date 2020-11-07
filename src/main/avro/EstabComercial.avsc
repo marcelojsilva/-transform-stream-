@@ -6,6 +6,7 @@
     {"name": "id", "type": "long"},
     {"name": "CodEc", "type": "long"},
     {"name": "tipoEC", "type": "string"},
-    {"name": "liberadoOperacao", "type": "int"}
+    {"name": "liberadoOperacao", "type": "int"},
+    {"name": "codGrupoEc", "type": "long"}
   ]
 }
