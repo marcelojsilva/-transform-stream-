@@ -67,74 +67,126 @@ public class TransformStream {
         final String identTopic = envProps.getProperty("identificador.input.topic.name");
         final String siOutputTopic = envProps.getProperty("si.output.topic.name");
 
-        // KStream<Long, EstabComercial> ec = builder.<Long, EstabComercial>stream(ecTopic)
-        //     .selectKey ((k,v) -> v.getId())
-        //     .filter((k,v) -> v.getLiberadoOperacao() == 1);
+        KStream<Long, EstabComercial> ec = builder.<Long, EstabComercial>stream(ecTopic);
+        KStream<Long, EstabComercial> ec2 = ec.map((key, value) -> new KeyValue<>(value.getId(), value));
+        ec2.to(ecTopic+"2", Produced.with(Serdes.Long(), ecAvroSerde(envProps)));
+        
+        KTable<Long, EstabComercial> ecTbl = builder.table(ecTopic+"2",
+            Materialized.as("EcTbl"));
+
+        ecTbl
+            .filter((k,v) -> v.getLiberadoOperacao() == 1)
+            .toStream()
+            .map((key, value) -> new KeyValue<>(value.getCodGrupoEc(), value))
+            .to(ecTopic+"3");
+        
+        KStream<Long, Identificador> ident = builder.<Long, Identificador>stream(identTopic);
+        KStream<Long, Identificador> ident2 = ident.map((key, value) -> new KeyValue<>(value.getCodGrupoEc(), value));
+        ident2.to(identTopic+"2", Produced.with(Serdes.Long(), identAvroSerde(envProps)));
+         
+        // KTable<Long, EstabComercial> ec2 = builder.table(ecTopic+"2", 
+        //     Consumed.with(Serdes.Long(), ecAvroSerde(envProps)), 
+        //     Materialized.as("EcTbl").with(Serdes.Long(), ecAvroSerde(envProps)));
+
+            // .filter((k,v) -> v.getLiberadoOperacao() == 1);
 
         // KStream<Long, EstabComercial> estabComercialTbl = ec
         //     .groupByKey()
         //     .reduce((v1,v2) -> v2)
-        //     .toStream();
+        //     .to(ecTopic+"2", Produced.with(Serdes.Long(), ecAvroSerde(envProps)));
+        //     // .toStream();
         //     // .toTable(Materialized.with(Serdes.Long(), ecAvroSerde(envProps)));
 
+        //     KStream<Long, Movie> movies = rawMovies.map((key, rawMovie) ->
+        //     new KeyValue<>(rawMovie.getId(), convertRawMovie(rawMovie)));
+
+        // KTable<Long, EstabComercial> ec = builder.table(ecTopic, Consumed.with(Serdes.Long(), ecAvroSerde(envProps)));
+        // ec
+        //     .toStream()
+        //     .selectKey ((k,v) -> v.getCodEc())
+        //     .to(ecTopic+"2", Produced.with(Serdes.Long(), ecAvroSerde(envProps)));
 
 
-        KStream<Long, EstabComercial> ec2 = builder.<Long, EstabComercial>stream(ecTopic)
-            .selectKey ((k,v) -> v.getCodGrupoEc())
-            .filter((k,v) -> v.getLiberadoOperacao() == 1);
-        
-        ec2.to(grupoEcAggrTopic);
+        // KTable<Long, EstabComercial> rekeyedTable2 =
+        //     ec
+        //         .groupBy(
+        //             (key, value) -> KeyValue.pair(value.getCodEc(), value),
+        //             Grouped.with(Serdes.Long(), ecAvroSerde(envProps))
+        //         )
+        //         // Dummy aggregation
+        //         .reduce(
+        //             (aggValue, newValue) -> newValue, /* adder */
+        //             (aggValue, oldValue) -> oldValue  /* subtractor */
+        //         );
+        //     rekeyedTable2.toStream().to("Ec2", Produced.with(Serdes.Long(), ecAvroSerde(envProps)));
 
-        KTable<Long, GrupoEcAggr> grupoEc = builder.stream(grupoEcAggrTopic,
-            Consumed.with(Serdes.Long(), ecAvroSerde(envProps)))
-            .selectKey ((k,v) -> v.getCodGrupoEc())
-            .groupByKey(Grouped.with(Serdes.Long(), ecAvroSerde(envProps)))
-            .aggregate(
-                // Initialized Aggregator
-                GrupoEcAggr::new,
-                //Aggregate
-                (idGrupoEc, estab, grupoEcAggr) -> {
-                    grupoEcAggr.setCodGrupoEc(idGrupoEc);
-                    grupoEcAggr.getEcs().add(estab);
-                    return grupoEcAggr;
-                },
-                // store in materialied view GrupoEcAggr
-                Materialized.<Long, GrupoEcAggr, KeyValueStore<Bytes, byte[]>>
-                    as("GrupoEcAggr")
-                        .withKeySerde(Serdes.Long())
-                        .withValueSerde(grupoEcAvroSerde(envProps)))
+            // .selectKey ((k,v) -> v.getCodEc());
+        //     .filter((k,v) -> v.getLiberadoOperacao() == 1);
+            
+        // ec2
+        //     .groupByKey(Grouped.with(Serdes.Long(), ecAvroSerde(envProps)))
+        //     .count()
+        //     .toStream()
+        //     .to(grupoEcAggrTopic);
+
+        // KTable<Long, EstabComercial> ec3 = builder.stream(grupoEcAggrTopic,
+        //     Consumed.with(Serdes.Long(), ecAvroSerde(envProps)))
+        //     .filter((k,v) -> v.getLiberadoOperacao() == 1)
+        //     .to("GrupoEcAggr3")
+        //     ;
+
+        // grupoEc.toTable(Materialized.as("testemj"));
+        // KTable<Long, GrupoEcAggr> grupoEc = builder.stream(grupoEcAggrTopic,
+            // Consumed.with(Serdes.Long(), ecAvroSerde(envProps)))
+            // .selectKey ((k,v) -> v.getCodGrupoEc())
+            // .groupByKey(Grouped.with(Serdes.Long(), ecAvroSerde(envProps)))
+            // .aggregate(
+            //     // Initialized Aggregator
+            //     GrupoEcAggr::new,
+            //     //Aggregate
+            //     (idGrupoEc, estab, grupoEcAggr) -> {
+            //         grupoEcAggr.setCodGrupoEc(idGrupoEc);
+            //         grupoEcAggr.getEcs().add(estab);
+            //         return grupoEcAggr;
+            //     }
+            // ,
+            //     // store in materialied view GrupoEcAggr
+            //     Materialized.<Long, GrupoEcAggr, KeyValueStore<Bytes, byte[]>>
+            //         as("GrupoEcAggr")
+            //             .withKeySerde(Serdes.Long())
+            //             .withValueSerde(grupoEcAvroSerde(envProps)))
         ;
         
-        KTable<Long, Identificador> ident = builder.<Long, Identificador>stream(identTopic)
-            .selectKey ((k,v) -> v.getCodGrupoEc())
-            .toTable();
+        // KTable<Long, Identificador> ident = builder.<Long, Identificador>stream(identTopic)
+        //     .selectKey ((k,v) -> v.getCodGrupoEc())
+        //     .toTable();
         
         
 
-        KStream<Long, IdentificadorEcResult> empResultTable =
-            ident.join(grupoEc, 
-                (identificador, grupoEcAggr) -> {
-                    return IdentificadorEcResult.newBuilder()
-                            .setId(identificador.getId())
-                            .setIdentificador(identificador)
-                            .setEcs(grupoEcAggr.getEcs())
-                            .build();
-                },
-                // store in materialied view EMP-RESULT-MV
-                Materialized.<Long, IdentificadorEcResult, KeyValueStore<Bytes, byte[]>>
-                    as("EMP-RESULT-MV")
-                    .withKeySerde(Serdes.Long())
-                    .withValueSerde(identEcResultAvroSerde(envProps))
-        ).toStream();
+        // KStream<Long, IdentificadorEcResult> empResultTable =
+        //     ident.join(ecTopic+"3", 
+        //         (identificador, grupoEcAggr) -> {
+        //             return IdentificadorEcResult.newBuilder()
+        //                     .setId(identificador.getId())
+        //                     .setIdentificador(identificador)
+        //                     .setEcs(grupoEcAggr.getEcs())
+        //                     .build();
+        //         },
+        //         // store in materialied view EMP-RESULT-MV
+        //         Materialized.<Long, IdentificadorEcResult, KeyValueStore<Bytes, byte[]>>
+        //             as("EMP-RESULT-MV")
+        //             .withKeySerde(Serdes.Long())
+        //             .withValueSerde(identEcResultAvroSerde(envProps))
+        // ).toStream();
 
-        KStream<Long, SituacaoIdentificador> si = empResultTable.flatMap((k, v) -> {
-            List<KeyValue<Long, SituacaoIdentificador>> result = convertEcToSI(v);
-            return result;
-            }
-        );                    
+        // KStream<Long, SituacaoIdentificador> si = empResultTable.flatMap((k, v) -> {
+        //     List<KeyValue<Long, SituacaoIdentificador>> result = convertEcToSI(v);
+        //     return result;
+        //     }
+        // );                    
 
 
-        si.to(siOutputTopic, Produced.with(Serdes.Long(), siAvroSerde(envProps)));
+        // si.to(siOutputTopic, Produced.with(Serdes.Long(), siAvroSerde(envProps)));
 
         return builder.build();
     }
@@ -215,6 +267,11 @@ public class TransformStream {
 
         topics.add(new NewTopic(
                 envProps.getProperty("estabComercial.input.topic.name"),
+                Integer.parseInt(envProps.getProperty("estabComercial.input.topic.partitions")),
+                Short.parseShort(envProps.getProperty("estabComercial.input.topic.replication.factor"))));
+
+        topics.add(new NewTopic(
+                envProps.getProperty("estabComercial.input.topic.name")+"2",
                 Integer.parseInt(envProps.getProperty("estabComercial.input.topic.partitions")),
                 Short.parseShort(envProps.getProperty("estabComercial.input.topic.replication.factor"))));
 
